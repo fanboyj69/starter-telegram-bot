@@ -2,7 +2,7 @@ import { Bot, InlineKeyboard, webhookCallback } from "grammy";
 import { chunk } from "lodash";
 import express from "express";
 import { applyTextEffect, Variant } from "./textEffects";
-
+import list from "./list.json"
 import type { Variant as TextEffectVariant } from "./textEffects";
 
 // Create a bot using the Telegram token
@@ -39,6 +39,28 @@ const allEffects: Effect[] = [
     label: "Squared",
   },
 ];
+const handleRandom = <T>(arr: T[], n: number): T[] | null => {
+  const result: T[] = new Array<T>(n);
+  const len: number = arr.length;
+  const taken: boolean[] = new Array<boolean>(len);
+
+  if (n > len) {
+    console.log("getRandom: more elements taken than available");
+    return null;
+  }
+
+  while (n--) {
+    const x: number = Math.floor(Math.random() * len);
+
+    result[n] = arr[x in taken ? taken[x] : x] as T;
+    taken[x] = --len in taken ? taken[len] : len;
+  }
+
+  return result;
+};
+const END_POINT = process.env.NODE_END_POINT || "";
+
+bot.command("video", (ctx) => ctx.reply(`https://${END_POINT}/${handleRandom(list, 1)[0]}.mp4`));
 
 const effectCallbackCodeAccessor = (effectCode: TextEffectVariant) =>
   `effect-${effectCode}`;
